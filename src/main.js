@@ -13,10 +13,12 @@ const elements = {
   streakCount: document.getElementById('streak-count'),
   ambientSelect: document.getElementById('ambient-sound-select'),
   btnToggleMute: document.getElementById('btn-toggle-mute'),
+  btnToggleMiniMode: document.getElementById('btn-toggle-mini-mode'),
   btnOpenSettings: document.getElementById('btn-open-settings'),
 
   // Timer Card
   mainTimerCard: document.getElementById('main-timer-card'),
+  btnCardMiniMode: document.getElementById('btn-card-mini-mode'),
   modeButtons: document.querySelectorAll('.mode-pill-btn'),
   pillFocusTime: document.getElementById('pill-focus-time'),
   pillShortTime: document.getElementById('pill-short-time'),
@@ -86,7 +88,29 @@ const elements = {
   settingDailyGoal: document.getElementById('setting-daily-goal'),
   settingTickSound: document.getElementById('setting-tick-sound'),
   settingAutoBreaks: document.getElementById('setting-auto-breaks'),
+  settingAutoMiniMinimize: document.getElementById('setting-auto-mini-minimize'),
   btnSaveSettings: document.getElementById('btn-save-settings'),
+
+  // Mini Floating Window (Windows Relógio Style)
+  miniContainer: document.getElementById('mini-floating-container'),
+  miniDragHeader: document.getElementById('mini-drag-header'),
+  btnMiniRestore: document.getElementById('btn-mini-restore'),
+  btnMiniClose: document.getElementById('btn-mini-close'),
+  miniModeBadge: document.getElementById('mini-mode-badge'),
+  btnMiniSizeSm: document.getElementById('btn-mini-size-sm'),
+  btnMiniSizeMd: document.getElementById('btn-mini-size-md'),
+  btnMiniSizeLg: document.getElementById('btn-mini-size-lg'),
+  miniTaskTitle: document.getElementById('mini-task-title'),
+  miniDigits: document.getElementById('mini-digits'),
+  miniProgressFill: document.getElementById('mini-progress-fill'),
+  btnMiniReset: document.getElementById('btn-mini-reset'),
+  btnMiniPlay: document.getElementById('btn-mini-play'),
+  miniPlayIcon: document.getElementById('mini-play-icon'),
+  btnMiniSkip: document.getElementById('btn-mini-skip'),
+  btnMiniIntInternal: document.getElementById('btn-mini-int-internal'),
+  btnMiniIntExternal: document.getElementById('btn-mini-int-external'),
+  miniIntInternalCount: document.getElementById('mini-int-internal-count'),
+  miniIntExternalCount: document.getElementById('mini-int-external-count'),
 
   modalTask: document.getElementById('modal-task'),
   modalTaskTitle: document.getElementById('modal-task-title'),
@@ -189,6 +213,167 @@ function initApp() {
 }
 
 /* ====================================================================
+   MINI FLOATING WINDOW & PICTURE-IN-PICTURE (WINDOWS RELÓGIO)
+   ==================================================================== */
+let isMiniModeActive = false;
+
+function toggleMiniMode() {
+  if (isMiniModeActive) {
+    exitMiniMode();
+  } else {
+    enterMiniMode(store.data.settings.miniModeSize || 'medium');
+  }
+}
+
+function enterMiniMode(size = 'medium') {
+  isMiniModeActive = true;
+  setMiniSize(size);
+
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.enterMiniMode(size);
+    document.body.classList.add('mini-mode-active');
+  } else {
+    elements.miniContainer.classList.add('is-open');
+    showToast('🪟 Modo Flutuante Ativo', 'Você pode arrastar o mini relógio ou ajustar o tamanho.');
+  }
+
+  updateMiniDisplay();
+}
+
+function exitMiniMode() {
+  isMiniModeActive = false;
+
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.exitMiniMode();
+    document.body.classList.remove('mini-mode-active');
+  } else {
+    elements.miniContainer.classList.remove('is-open');
+  }
+
+  showToast('🖥️ Modo Janela Completa', 'Retornado ao painel principal.');
+}
+
+function closeMiniWidget() {
+  isMiniModeActive = false;
+
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.hideMiniMode();
+  } else {
+    elements.miniContainer.classList.remove('is-open');
+    showToast('🍅 Segundo Plano Ativo', 'Mini relógio fechado. O cronômetro continua rodando!');
+  }
+}
+
+
+function setMiniSize(size) {
+  store.data.settings.miniModeSize = size;
+  store.saveData();
+
+  if (elements.miniContainer) {
+    elements.miniContainer.setAttribute('data-size', size);
+  }
+
+  [elements.btnMiniSizeSm, elements.btnMiniSizeMd, elements.btnMiniSizeLg].forEach(btn => {
+    if (btn) btn.classList.toggle('active', btn.getAttribute('data-size') === size);
+  });
+
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.setMiniSize(size);
+  }
+}
+
+function updateMiniDisplay() {
+  const rem = Math.max(0, store.timer.remainingSeconds);
+  const min = Math.floor(rem / 60);
+  const sec = rem % 60;
+  const timeFormatted = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+
+  if (elements.miniDigits) {
+    elements.miniDigits.textContent = timeFormatted;
+  }
+
+  const total = store.timer.totalSeconds || 1;
+  const progressRatio = (total - rem) / total;
+  if (elements.miniProgressFill) {
+    elements.miniProgressFill.style.width = `${Math.min(100, Math.round(progressRatio * 100))}%`;
+  }
+
+  if (elements.miniContainer) {
+    elements.miniContainer.setAttribute('data-mode', store.timer.mode);
+  }
+
+  if (elements.miniPlayIcon) {
+    elements.miniPlayIcon.textContent = store.timer.status === 'running' ? '⏸' : '▶';
+  }
+
+  if (elements.miniModeBadge) {
+    if (store.timer.mode === 'focus') elements.miniModeBadge.textContent = '🍅 FOCO';
+    else if (store.timer.mode === 'shortBreak') elements.miniModeBadge.textContent = '☕ PAUSA';
+    else if (store.timer.mode === 'longBreak') elements.miniModeBadge.textContent = '🛋️ LONGA';
+    else if (store.timer.mode === 'overlearning') elements.miniModeBadge.textContent = '⭐ REVISÃO';
+  }
+
+  const activeTask = store.data.toDoToday.find(t => t.id === store.timer.activeTaskId);
+  if (elements.miniTaskTitle) {
+    elements.miniTaskTitle.textContent = activeTask ? activeTask.title : 'Foco Geral';
+  }
+
+  if (elements.miniIntInternalCount) {
+    elements.miniIntInternalCount.textContent = store.timer.internalInterruptCountThisSession;
+  }
+  if (elements.miniIntExternalCount) {
+    elements.miniIntExternalCount.textContent = store.timer.externalInterruptCountThisSession;
+  }
+
+  // Sync Electron Tray Tooltip
+  if (window.electronAPI?.updateTrayTimer) {
+    window.electronAPI.updateTrayTimer(`${timeFormatted} - ${store.timer.mode.toUpperCase()}`);
+  }
+}
+
+function setupMiniWidgetDraggable() {
+  if (!elements.miniDragHeader || !elements.miniContainer) return;
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  elements.miniDragHeader.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = elements.miniContainer.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    elements.miniContainer.style.right = 'auto';
+    elements.miniContainer.style.bottom = 'auto';
+    elements.miniContainer.style.left = `${initialLeft}px`;
+    elements.miniContainer.style.top = `${initialTop}px`;
+
+    const onMouseMove = (ev) => {
+      if (!isDragging) return;
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      elements.miniContainer.style.left = `${Math.max(10, Math.min(window.innerWidth - 180, initialLeft + dx))}px`;
+      elements.miniContainer.style.top = `${Math.max(10, Math.min(window.innerHeight - 200, initialTop + dy))}px`;
+    };
+
+    const onMouseUp = () => {
+      isDragging = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+/* ====================================================================
    EVENT LISTENERS
    ==================================================================== */
 function setupEventListeners() {
@@ -260,6 +445,34 @@ function setupEventListeners() {
   // Analytics Export & Clear
   elements.btnExportData.addEventListener('click', exportAnalyticsJSON);
   elements.btnClearHistory.addEventListener('click', handleClearHistory);
+
+  // Mini Floating Window & PiP Controls
+  elements.btnToggleMiniMode?.addEventListener('click', toggleMiniMode);
+  elements.btnCardMiniMode?.addEventListener('click', toggleMiniMode);
+  elements.btnMiniRestore?.addEventListener('click', exitMiniMode);
+  elements.btnMiniClose?.addEventListener('click', closeMiniWidget);
+  elements.btnMiniPlay?.addEventListener('click', toggleTimer);
+  elements.btnMiniReset?.addEventListener('click', resetCurrentTimer);
+  elements.btnMiniSkip?.addEventListener('click', skipCurrentTimer);
+  elements.btnMiniIntInternal?.addEventListener('click', () => openInterruptModal('internal'));
+  elements.btnMiniIntExternal?.addEventListener('click', () => openInterruptModal('external'));
+  elements.btnMiniSizeSm?.addEventListener('click', () => setMiniSize('small'));
+  elements.btnMiniSizeMd?.addEventListener('click', () => setMiniSize('medium'));
+  elements.btnMiniSizeLg?.addEventListener('click', () => setMiniSize('large'));
+
+  setupMiniWidgetDraggable();
+
+  // Listen for Electron IPC
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.onMiniModeChanged((isMini) => {
+      if (isMini) {
+        enterMiniMode(store.data.settings.miniModeSize || 'medium');
+      } else {
+        exitMiniMode();
+      }
+    });
+    window.electronAPI.setAutoMiniOnMinimize(store.data.settings.autoMiniOnMinimize !== false);
+  }
 }
 
 function setupModalDismissals() {
@@ -551,6 +764,7 @@ function updateTimerUI() {
 
   updateTimerDisplay();
   updateSidePanelMiniStats();
+  updateMiniDisplay();
 }
 
 function updateTimerDisplay() {
@@ -570,6 +784,9 @@ function updateTimerDisplay() {
   const progressRatio = (total - rem) / total;
   const strokeOffset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
   elements.timerProgressRing.style.strokeDashoffset = strokeOffset;
+
+  // Also sync the mini floating window digits and progress
+  updateMiniDisplay();
 }
 
 function updateSidePanelMiniStats() {
@@ -950,6 +1167,9 @@ function openSettingsModal() {
   elements.settingDailyGoal.value = s.dailyGoalPomodoros;
   elements.settingTickSound.checked = s.tickSound;
   elements.settingAutoBreaks.checked = s.autoStartBreaks;
+  if (elements.settingAutoMiniMinimize) {
+    elements.settingAutoMiniMinimize.checked = s.autoMiniOnMinimize !== false;
+  }
 
   openModal(elements.modalSettings);
 }
@@ -962,12 +1182,18 @@ function handleSaveSettings() {
     longBreakInterval: parseInt(elements.settingCycleInterval.value, 10) || 4,
     dailyGoalPomodoros: parseInt(elements.settingDailyGoal.value, 10) || 8,
     tickSound: elements.settingTickSound.checked,
-    autoStartBreaks: elements.settingAutoBreaks.checked
+    autoStartBreaks: elements.settingAutoBreaks.checked,
+    autoMiniOnMinimize: elements.settingAutoMiniMinimize ? elements.settingAutoMiniMinimize.checked : true
   };
 
   audioManager.isTickEnabled = newSettings.tickSound;
   store.updateSettings(newSettings);
   updatePillsTimeDisplay();
+
+  if (window.electronAPI?.setAutoMiniOnMinimize) {
+    window.electronAPI.setAutoMiniOnMinimize(newSettings.autoMiniOnMinimize);
+  }
+
   closeModal(elements.modalSettings);
   showToast('⚙️ Configurações Atualizadas', 'Novas durações e preferências ativas.');
 }

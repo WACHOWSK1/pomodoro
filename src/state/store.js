@@ -13,7 +13,9 @@ const DEFAULT_SETTINGS = {
   effectsVolume: 0.7,
   ambientVolume: 0.35,
   ambientSound: 'none',
-  dailyGoalPomodoros: 8
+  dailyGoalPomodoros: 8,
+  autoMiniOnMinimize: true,
+  miniModeSize: 'medium'   // 'small' | 'medium' | 'large'
 };
 
 const DEFAULT_TASKS_TODAY = [

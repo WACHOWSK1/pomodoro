@@ -1495,3 +1495,389 @@ input, textarea, select {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.22);
 }
+
+/* ====================================================================
+   COMPACT PICTURE-IN-PICTURE & MINI FLOATING WINDOW (WINDOWS RELÓGIO)
+   ==================================================================== */
+
+.timer-card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-pip-card {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.btn-pip-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+}
+
+/* FLOATING MINI WINDOW CARD */
+.mini-floating-window {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(14, 20, 32, 0.95);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 99999;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  transition: width 0.2s var(--ease-spring), height 0.2s var(--ease-spring), box-shadow 0.3s ease;
+}
+
+/* Dynamic theme borders & glows in Mini Mode */
+.mini-floating-window[data-mode="focus"] {
+  border-color: rgba(255, 71, 87, 0.35);
+  box-shadow: 0 16px 45px rgba(255, 71, 87, 0.18), 0 0 1px rgba(255, 71, 87, 0.4);
+}
+.mini-floating-window[data-mode="shortBreak"] {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 16px 45px rgba(16, 185, 129, 0.18), 0 0 1px rgba(16, 185, 129, 0.4);
+}
+.mini-floating-window[data-mode="longBreak"] {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 16px 45px rgba(59, 130, 246, 0.18), 0 0 1px rgba(59, 130, 246, 0.4);
+}
+.mini-floating-window[data-mode="overlearning"] {
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 16px 45px rgba(245, 158, 11, 0.18), 0 0 1px rgba(245, 158, 11, 0.4);
+}
+
+/* SIZES CONFIGURATION */
+.mini-floating-window[data-size="small"] {
+  width: 230px;
+  height: 270px;
+}
+.mini-floating-window[data-size="small"] .mini-digits {
+  font-size: 2.5rem;
+}
+
+.mini-floating-window[data-size="medium"] {
+  width: 280px;
+  height: 330px;
+}
+.mini-floating-window[data-size="medium"] .mini-digits {
+  font-size: 3.1rem;
+}
+
+.mini-floating-window[data-size="large"] {
+  width: 350px;
+  height: 410px;
+}
+.mini-floating-window[data-size="large"] .mini-digits {
+  font-size: 4rem;
+}
+
+/* Display active floating window */
+.mini-floating-window.is-open {
+  display: flex;
+  animation: miniPopIn 0.22s var(--ease-spring);
+}
+
+@keyframes miniPopIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* When in Native Electron Mini Mode (Window itself is the mini view) */
+body.mini-mode-active {
+  background: #090d16 !important;
+  overflow: hidden !important;
+}
+
+body.mini-mode-active .app-container {
+  display: none !important;
+}
+
+body.mini-mode-active .mini-floating-window {
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Mini Window Drag Bar (Header) */
+.mini-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-app-region: drag; /* Draggable on Windows desktop */
+  cursor: move;
+}
+
+.mini-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  -webkit-app-region: no-drag;
+}
+
+.mini-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: all var(--transition-fast);
+  -webkit-app-region: no-drag;
+}
+
+.mini-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.mini-icon-btn.close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.mini-mode-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  -webkit-app-region: no-drag;
+}
+
+.mini-floating-window[data-mode="focus"] .mini-mode-badge {
+  background: var(--focus-surface);
+  color: var(--focus-accent);
+}
+.mini-floating-window[data-mode="shortBreak"] .mini-mode-badge {
+  background: var(--short-surface);
+  color: var(--short-accent);
+}
+.mini-floating-window[data-mode="longBreak"] .mini-mode-badge {
+  background: var(--long-surface);
+  color: var(--long-accent);
+}
+
+/* Size Toggles (P / M / G) */
+.mini-size-toggles {
+  display: flex;
+  gap: 0.2rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.15rem;
+  border-radius: 7px;
+}
+
+.mini-size-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.mini-size-btn:hover {
+  color: #fff;
+}
+
+.mini-size-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Mini Body Layout */
+.mini-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1rem 1rem;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.mini-task-title {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.mini-digits {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1;
+}
+
+.mini-floating-window[data-mode="focus"] .mini-digits {
+  color: #fff;
+  text-shadow: 0 0 20px var(--focus-glow);
+}
+.mini-floating-window[data-mode="shortBreak"] .mini-digits {
+  color: #fff;
+  text-shadow: 0 0 20px var(--short-glow);
+}
+.mini-floating-window[data-mode="longBreak"] .mini-digits {
+  color: #fff;
+  text-shadow: 0 0 20px var(--long-glow);
+}
+
+.mini-progress-bar {
+  width: 85%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.mini-floating-window[data-mode="focus"] .mini-progress-fill {
+  background: var(--focus-gradient);
+}
+.mini-floating-window[data-mode="shortBreak"] .mini-progress-fill {
+  background: var(--short-gradient);
+}
+.mini-floating-window[data-mode="longBreak"] .mini-progress-fill {
+  background: var(--long-gradient);
+}
+.mini-floating-window[data-mode="overlearning"] .mini-progress-fill {
+  background: var(--over-gradient);
+}
+
+/* Mini Action Controls (Centered circular buttons like Windows Relógio) */
+.mini-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.mini-play-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--focus-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 18px var(--focus-glow);
+  transition: all var(--transition-fast);
+}
+
+.mini-floating-window[data-mode="shortBreak"] .mini-play-btn {
+  background: var(--short-gradient);
+  box-shadow: 0 4px 18px var(--short-glow);
+}
+.mini-floating-window[data-mode="longBreak"] .mini-play-btn {
+  background: var(--long-gradient);
+  box-shadow: 0 4px 18px var(--long-glow);
+}
+.mini-floating-window[data-mode="overlearning"] .mini-play-btn {
+  background: var(--over-gradient);
+  box-shadow: 0 4px 18px var(--over-glow);
+}
+
+.mini-play-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(1.1);
+}
+.mini-play-btn:active {
+  transform: scale(0.96);
+}
+
+.mini-btn-secondary {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.mini-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* Mini Interruption Buttons */
+.mini-interruptions-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.mini-int-btn {
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+.mini-int-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+

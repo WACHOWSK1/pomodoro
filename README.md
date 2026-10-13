@@ -23,7 +23,13 @@ Sistema web baseado na metodologia oficial de **Francesco Cirillo** (*The Pomodo
 - 🎧 **Sons Ambientais & Áudio Sintetizado**:
   - Ruído Marrom, Ruído Branco, Chuva Sintética e Ondas Alfa (10Hz).
   - Tique-taque mecânico Cirillo e sino de término harmônico.
+- 🪟 **Modo Mini Relógio Flutuante (Estilo Relógio do Windows / Compact Overlay)**:
+  - Botão no cabeçalho e no card principal para transformar a aplicação em um mini widget flutuante sobreposto (*Always on Top*).
+  - **Minimização Inteligente**: Ao minimizar a janela principal, ela se converte automaticamente no mini relógio flutuante.
+  - **Redimensionamento Rápido**: Controles de escala em tempo real (**P** pequeno, **M** médio, **G** grande) e arraste livre.
+  - **Execução Contínua em Segundo Plano**: Fechar o mini botão (`✕`) não encerra o programa nem interrompe a contagem; o sistema permanece ativo na **Bandeja do Sistema (System Tray)** até que o usuário feche o programa por completo.
 - 📊 **Métricas, Histórico & Exportação JSON**.
+
 
 ## Executando o Projeto
 

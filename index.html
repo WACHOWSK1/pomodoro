@@ -51,6 +51,14 @@
           </svg>
         </button>
 
+        <!-- Floating Mini Window / Picture-in-Picture Button (Windows Relógio Style) -->
+        <button id="btn-toggle-mini-mode" class="icon-button" title="Fixar Janela Flutuante Sobreposta (Relógio Windows)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <rect x="11" y="8" width="9" height="7" rx="1"></rect>
+          </svg>
+        </button>
+
         <!-- Settings Modal Button -->
         <button id="btn-open-settings" class="icon-button" title="Configurações do Timer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -90,16 +98,26 @@
           <!-- Central Timer Column -->
           <div class="timer-card" id="main-timer-card" data-mode="focus">
             
-            <!-- Mode Switcher -->
-            <div class="mode-switcher">
-              <button class="mode-pill-btn active" data-mode="focus" id="mode-btn-focus">
-                🍅 Foco (<span id="pill-focus-time">25</span>m)
-              </button>
-              <button class="mode-pill-btn" data-mode="shortBreak" id="mode-btn-short">
-                ☕ Pausa Curta (<span id="pill-short-time">5</span>m)
-              </button>
-              <button class="mode-pill-btn" data-mode="longBreak" id="mode-btn-long">
-                🛋️ Pausa Longa (<span id="pill-long-time">15</span>m)
+            <!-- Mode Switcher & Compact PiP Button -->
+            <div class="timer-card-top-bar">
+              <div class="mode-switcher">
+                <button class="mode-pill-btn active" data-mode="focus" id="mode-btn-focus">
+                  🍅 Foco (<span id="pill-focus-time">25</span>m)
+                </button>
+                <button class="mode-pill-btn" data-mode="shortBreak" id="mode-btn-short">
+                  ☕ Pausa Curta (<span id="pill-short-time">5</span>m)
+                </button>
+                <button class="mode-pill-btn" data-mode="longBreak" id="mode-btn-long">
+                  🛋️ Pausa Longa (<span id="pill-long-time">15</span>m)
+                </button>
+              </div>
+
+              <button class="btn-pip-card" id="btn-card-mini-mode" title="Fixar Janela Flutuante Sobreposta (Relógio Windows)">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                  <rect x="11" y="8" width="9" height="7" rx="1"></rect>
+                </svg>
+                <span>Flutuante</span>
               </button>
             </div>
 
@@ -540,6 +558,14 @@
         <input type="checkbox" id="setting-auto-breaks" style="width: 20px; height: 20px; cursor: pointer;">
       </div>
 
+      <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">Janela Flutuante ao Minimizar</span>
+          <p style="font-size: 0.76rem; color: var(--text-muted);">Transformar em mini relógio sobreposto (estilo Windows) ao minimizar</p>
+        </div>
+        <input type="checkbox" id="setting-auto-mini-minimize" style="width: 20px; height: 20px; cursor: pointer;" checked>
+      </div>
+
       <div class="modal-actions">
         <button class="btn-secondary" data-close="modal-settings">Cancelar</button>
         <button class="btn-primary" id="btn-save-settings">Salvar Configurações</button>
@@ -708,6 +734,83 @@
       <div style="font-size: 0.78rem; color: var(--text-secondary);" id="toast-message">Mais um bloco de foco consolidado.</div>
     </div>
   </div>
+
+  <!-- ====================================================================
+       FLOATING MINI WINDOW (WINDOWS CLOCK OVERLAY STYLE)
+       ==================================================================== -->
+  <aside id="mini-floating-container" class="mini-floating-window" aria-label="Mini Relógio Flutuante" data-size="medium">
+    <!-- Mini Top Drag Bar & Controls -->
+    <div class="mini-header" id="mini-drag-header">
+      <button id="btn-mini-restore" class="mini-icon-btn" title="Expandir para Janela Completa (Restaurar)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+
+      <span class="mini-mode-badge" id="mini-mode-badge">🍅 FOCO</span>
+
+      <div class="mini-header-right">
+        <!-- Size Toggles (P / M / G) -->
+        <div class="mini-size-toggles" title="Ajustar escala do mini relógio">
+          <button class="mini-size-btn" data-size="small" id="btn-mini-size-sm">P</button>
+          <button class="mini-size-btn active" data-size="medium" id="btn-mini-size-md">M</button>
+          <button class="mini-size-btn" data-size="large" id="btn-mini-size-lg">G</button>
+        </div>
+
+        <!-- Close Mini View (Does NOT close the app, keeps timer running!) -->
+        <button id="btn-mini-close" class="mini-icon-btn close" title="Fechar modo flutuante (O cronômetro continuará rodando)">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Mini Body Content -->
+    <div class="mini-body">
+      <div class="mini-task-title" id="mini-task-title" title="Tarefa Ativa">Revisão bibliográfica</div>
+      
+      <div class="mini-time-row">
+        <span class="mini-digits" id="mini-digits">25:00</span>
+      </div>
+
+      <div class="mini-progress-bar">
+        <div class="mini-progress-fill" id="mini-progress-fill" style="width: 0%;"></div>
+      </div>
+
+      <!-- Mini Action Controls -->
+      <div class="mini-controls-row">
+        <button class="mini-btn-secondary" id="btn-mini-reset" title="Reiniciar contagem da sessão">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 2v6h6"></path>
+            <path d="M3 13a9 9 0 1 0 3-7.7L3 8"></path>
+          </svg>
+        </button>
+
+        <button class="mini-play-btn" id="btn-mini-play" title="Iniciar / Pausar">
+          <span id="mini-play-icon">▶</span>
+        </button>
+
+        <button class="mini-btn-secondary" id="btn-mini-skip" title="Avançar sessão">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Cirillo Quick Interruptions Row -->
+      <div class="mini-interruptions-row">
+        <button class="mini-int-btn" id="btn-mini-int-internal" title="Interrupção Interna (')">
+          ' <span id="mini-int-internal-count">0</span>
+        </button>
+        <button class="mini-int-btn" id="btn-mini-int-external" title="Interrupção Externa (-)">
+          - <span id="mini-int-external-count">0</span>
+        </button>
+      </div>
+    </div>
+  </aside>
 
   <script type="module" src="/src/main.js"></script>
 </body>
