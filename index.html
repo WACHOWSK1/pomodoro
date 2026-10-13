@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOCUS MESTRADO | Pomodoro & Alta Produtividade</title>
+  <meta name="description" content="Aplicativo de alta produtividade baseado na Técnica Pomodoro oficial de Francesco Cirillo e nas neurociências do Guia de Estudos 2024.">
+  <link rel="stylesheet" href="/src/styles/index.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍅</text></svg>">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- TOP NAVIGATION BAR -->
+    <header class="navbar">
+      <div class="brand-wrapper">
+        <div class="brand-logo-icon">🍅</div>
+        <div class="brand-text-col">
+          <div class="brand-title">
+            FOCUS MESTRADO
+            <span class="brand-badge">Cirillo & IFRS</span>
+          </div>
+          <div class="brand-sub">Sistema Científico de Foco & Produtividade</div>
+        </div>
+      </div>
+
+      <div class="navbar-actions">
+        <!-- Streak counter -->
+        <div class="streak-pill" title="Sequência diária de dias focados">
+          <span>🔥</span>
+          <span id="streak-count">1</span> dia(s)
+        </div>
+
+        <!-- Ambient sound selector -->
+        <div class="ambient-selector-wrapper" title="Ruídos mascaradores neurais (baseados no Guia de Estudos)">
+          <span>🎧</span>
+          <select id="ambient-sound-select">
+            <option value="none">Sons: Desligado</option>
+            <option value="brown">Ruído Marrom (Foco Profundo)</option>
+            <option value="white">Ruído Branco (Mascarador)</option>
+            <option value="rain">Chuva Relaxante (Sintetizada)</option>
+            <option value="binaural">Ondas Alfa 10Hz (Binaural)</option>
+          </select>
+        </div>
+
+        <!-- Mute Audio Toggle -->
+        <button id="btn-toggle-mute" class="icon-button" title="Silenciar todos os áudios">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+
+        <!-- Settings Modal Button -->
+        <button id="btn-open-settings" class="icon-button" title="Configurações do Timer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN APP TABS -->
+    <nav class="tabs-nav" aria-label="Navegação Principal">
+      <button class="tab-btn active" data-tab="timer" id="tab-btn-timer">
+        <span>⏱️</span> Cronômetro
+      </button>
+      <button class="tab-btn" data-tab="tasks" id="tab-btn-tasks">
+        <span>📋</span> Tarefas de Hoje (Cirillo)
+        <span class="tab-badge" id="tasks-today-count-badge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="inventory" id="tab-btn-inventory">
+        <span>📦</span> Inventário (Backlog)
+        <span class="tab-badge" id="inventory-count-badge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="guide" id="tab-btn-guide">
+        <span>🧠</span> Guia & Neurociência
+      </button>
+      <button class="tab-btn" data-tab="analytics" id="tab-btn-analytics">
+        <span>📊</span> Métricas & Histórico
+      </button>
+    </nav>
+
+    <!-- MAIN VIEW 1: TIMER DASHBOARD -->
+    <main>
+      <section id="view-timer" class="view-section active">
+        <div class="timer-hero-grid">
+          
+          <!-- Central Timer Column -->
+          <div class="timer-card" id="main-timer-card" data-mode="focus">
+            
+            <!-- Mode Switcher -->
+            <div class="mode-switcher">
+              <button class="mode-pill-btn active" data-mode="focus" id="mode-btn-focus">
+                🍅 Foco (<span id="pill-focus-time">25</span>m)
+              </button>
+              <button class="mode-pill-btn" data-mode="shortBreak" id="mode-btn-short">
+                ☕ Pausa Curta (<span id="pill-short-time">5</span>m)
+              </button>
+              <button class="mode-pill-btn" data-mode="longBreak" id="mode-btn-long">
+                🛋️ Pausa Longa (<span id="pill-long-time">15</span>m)
+              </button>
+            </div>
+
+            <!-- Active Task Link Banner -->
+            <div class="active-task-hero-banner" id="active-task-hero-banner">
+              <div class="active-task-col">
+                <span class="active-task-tag" id="active-task-category-tag">Mestrado</span>
+                <span class="active-task-name" id="active-task-display-name">Carregando tarefa...</span>
+              </div>
+              <button class="active-task-change-btn" id="btn-switch-active-task">Trocar Tarefa</button>
+            </div>
+
+            <!-- Cirillo Overlearning Banner (Shown if task finished during active pomodoro) -->
+            <div class="overlearning-banner" id="overlearning-banner">
+              <div class="overlearning-title">
+                <span>⭐</span> Modo Superaprendizagem (Overlearning Cirillo)
+              </div>
+              <div class="overlearning-text">
+                Tarefa concluída antes do sino! Conforme a regra de Cirillo, <strong>não interrompa o Pomodoro</strong>: utilize os minutos restantes para revisar suas anotações, sintetizar conclusões ou aplicar Recordação Ativa.
+              </div>
+            </div>
+
+            <!-- Circular SVG Ring Timer -->
+            <div class="circle-timer-container">
+              <svg class="timer-svg" viewBox="0 0 280 280">
+                <circle class="timer-track" cx="140" cy="140" r="120"></circle>
+                <circle class="timer-progress" id="timer-progress-ring" cx="140" cy="140" r="120"
+                        stroke-dasharray="753.98" stroke-dashoffset="0"></circle>
+              </svg>
+              <div class="timer-digits-box">
+                <span class="timer-state-label" id="timer-mode-label">Foco Profundo</span>
+                <span class="timer-time-display" id="timer-time-text">25:00</span>
+                <div class="cycle-dots-container">
+                  <div class="cycle-dot" id="dot-1"></div>
+                  <div class="cycle-dot" id="dot-2"></div>
+                  <div class="cycle-dot" id="dot-3"></div>
+                  <div class="cycle-dot" id="dot-4"></div>
+                  <span class="cycle-label" id="cycle-label-text">Ciclo 1/4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Primary Action Controls -->
+            <div class="timer-controls-row">
+              <button class="btn-secondary-action" id="btn-reset-timer" title="Reiniciar tempo da sessão atual">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 2v6h6"></path>
+                  <path d="M3 13a9 9 0 1 0 3-7.7L3 8"></path>
+                </svg>
+              </button>
+
+              <button class="btn-main-action" id="btn-play-pause-timer" data-mode="focus">
+                <span id="btn-play-icon">▶</span>
+                <span id="btn-play-label">INICIAR FOCO</span>
+              </button>
+
+              <button class="btn-secondary-action" id="btn-skip-timer" title="Avançar para o próximo intervalo/foco">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                  <line x1="19" y1="5" x2="19" y2="19"></line>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Cirillo Interruption Logger Bar -->
+            <div class="interruptions-bar" id="interruptions-bar">
+              <div class="interruptions-bar-title">
+                <span>Rastreamento de Interrupções (Cirillo)</span>
+                <span class="brand-badge">Indivisibilidade</span>
+              </div>
+              <div class="interruptions-btn-group">
+                <button class="btn-interruption internal" id="btn-log-internal-interrupt" title="Apostrophe (') - Impulso interno: vontade de navegar, fome, pensamento repentino">
+                  <span>💭</span>
+                  <span>Interna ( <strong style="color:#d8b4fe;">'</strong> )</span>
+                  <span class="interruption-badge" id="badge-internal-count">0</span>
+                </button>
+                <button class="btn-interruption external" id="btn-log-external-interrupt" title="Dash (-) - Interrupção externa: chamado de pessoa, ligação, mensagem urgente">
+                  <span>💬</span>
+                  <span>Externa ( <strong style="color:#f472b6;">-</strong> )</span>
+                  <span class="interruption-badge" id="badge-external-count">0</span>
+                </button>
+              </div>
+
+              <!-- Void Pomodoro Button -->
+              <div class="void-btn-row">
+                <button class="btn-void-pomodoro" id="btn-trigger-void" title="Cirillo: 'Se um Pomodoro é interrompido definitivamente, ele é considerado nulo e cancelado'">
+                  <span>⚠️</span> Anular Pomodoro (Interrupção Definitiva)
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Side Panel (Ambiente & Metas Rápidas) -->
+          <div class="timer-side-panel">
+            
+            <!-- Daily Goal Mini Card -->
+            <div class="panel-card">
+              <div class="panel-card-header">
+                <div class="panel-card-title">
+                  <span>🎯</span> Meta Diária de Foco
+                </div>
+                <span class="brand-badge" id="daily-pomodoro-status">0/8</span>
+              </div>
+              <div class="stat-mini-row">
+                <div class="stat-mini-value" id="mini-stat-pomodoros">0</div>
+                <div class="stat-mini-sub">pomodoros concluídos hoje</div>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="mini-stat-progress-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Quick Environment Checklist (Guia de Estudos 2024) -->
+            <div class="panel-card">
+              <div class="panel-card-header">
+                <div class="panel-card-title">
+                  <span>🌿</span> Ambiente de Estudos
+                </div>
+                <button class="btn-task-action" id="btn-quick-reset-checklist" title="Limpar checklist">Resetar</button>
+              </div>
+              <p style="font-size:0.76rem; color:var(--text-muted); margin-bottom: 0.75rem;">
+                Prepare seu espaço cognitivo antes de focar (IFRS 2024):
+              </p>
+              <div id="side-checklist-container">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Method Insight Quote -->
+            <div class="panel-card" style="background: rgba(14, 20, 36, 0.5);">
+              <div class="panel-card-header">
+                <div class="panel-card-title">
+                  <span>💡</span> Princípio Neurocientífico
+                </div>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;" id="rotating-tip-text">
+                "Não espere o momento ideal para começar uma tarefa. A ferramenta da <strong>execução máxima</strong> valoriza os blocos curtos imediatos e destrói a procrastinação." — <em>Guia de Estudos 2024</em>
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- MAIN VIEW 2: TAREFAS DE HOJE (TO DO TODAY) -->
+      <section id="view-tasks" class="view-section">
+        <div class="section-box">
+          <div class="section-box-header">
+            <div>
+              <div class="section-box-title">
+                <span>📋</span> Tarefas de Hoje (To Do Today - Francesco Cirillo)
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Cada tarefa possui estimativa de pomodoros (<span style="color:#94a3b8;">○</span>), concluídos (<span style="color:var(--focus-accent);">●</span>), adicionais (<span style="color:var(--over-accent);">■</span>) e interrupções (<span style="color:#c084fc;">'</span> e <span style="color:#f472b6;">-</span>).
+              </p>
+            </div>
+            <button class="btn-primary-small" id="btn-add-today-task">
+              <span>+</span> Adicionar Tarefa
+            </button>
+          </div>
+
+          <!-- Tasks Today List Container -->
+          <div id="tasks-today-list-container">
+            <!-- Dynamic task items -->
+          </div>
+
+          <!-- Unplanned & Urgent Sub-section -->
+          <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-subtle);">
+            <div class="section-box-header">
+              <div class="section-box-title" style="font-size: 1rem; color: #f87171;">
+                <span>⚡</span> Atividades Não Planejadas & Urgentes (Cirillo)
+              </div>
+              <span class="brand-badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">Imprevistos do Dia</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Demandas que surgiram de surpresa durante o expediente. Anote aqui rapidamente para não desviar do seu plano original.
+            </p>
+            <div id="urgent-tasks-today-list-container">
+              <!-- Urgent dynamic task items -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAIN VIEW 3: INVENTÁRIO DE ATIVIDADES (BACKLOG) -->
+      <section id="view-inventory" class="view-section">
+        <div class="section-box">
+          <div class="section-box-header">
+            <div>
+              <div class="section-box-title">
+                <span>📦</span> Inventário de Atividades (Activity Inventory)
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                O repositório geral de tudo o que você precisa fazer no Mestrado ou trabalho. Quando for iniciar o dia, selecione tarefas para a lista "Hoje".
+              </p>
+            </div>
+            <button class="btn-primary-small" id="btn-add-inventory-task">
+              <span>+</span> Nova Tarefa no Inventário
+            </button>
+          </div>
+
+          <div id="inventory-list-container">
+            <!-- Dynamic inventory items -->
+          </div>
+        </div>
+      </section>
+
+      <!-- MAIN VIEW 4: GUIA DE ESTUDOS & TÉCNICAS (IFRS + CIRILLO) -->
+      <section id="view-guide" class="view-section">
+        <div class="guide-layout-grid">
+          
+          <!-- Column 1: Guia de Estudos 2024 (IFRS) -->
+          <div class="section-box">
+            <div class="section-box-header">
+              <div class="section-box-title">
+                <span>🎓</span> Guia de Estudos 2024 (IFRS)
+              </div>
+              <span class="brand-badge">Neuroaprendizagem</span>
+            </div>
+
+            <!-- Card 1: Execução Máxima -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>⚡</span> Ferramenta da Execução Máxima
+              </div>
+              <div class="technique-card-body">
+                Trata-se de valorizar os pequenos períodos de tempo disponíveis para estudos. Em vez de esperar pelo "momento perfeito", dê o melhor de si imediatamente no bloco disponível. Isso elimina o argumento mental utilizado na procrastinação.
+              </div>
+              <div class="technique-tip-box">
+                <strong>Dica de ouro:</strong> 25 minutos com alta intensidade cognitiva produzem mais resultados que 3 horas de atenção difusa e celular na mão.
+              </div>
+            </div>
+
+            <!-- Card 2: Recordação Ativa (Active Recall) -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>🧠</span> Recordação Ativa & Resumo Ativo
+              </div>
+              <div class="technique-card-body">
+                Resumos passivos (apenas copiar slides ou textos) exigem pouco esforço cognitivo e têm baixíssima retenção. No <strong>resumo ativo</strong>, você força o cérebro a recuperar a informação da memória de longo prazo antes de olhar o material.
+              </div>
+              <div class="technique-tip-box">
+                <strong>No aplicativo:</strong> Ao final de cada pomodoro, o app solicita que você escreva 2 a 3 pontos-chave do que acabou de produzir ou ler sem olhar!
+              </div>
+            </div>
+
+            <!-- Card 3: Ambiente & Mascaramento Sonoro -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>🎧</span> Sons, Música e Ambiente
+              </div>
+              <div class="technique-card-body">
+                Músicas com letra dividem a atenção fonológica do cérebro. Para tarefas de alta densidade intelectual (leituras de mestrado, escrita de dissertação), utilize silêncio ou <strong>ruídos de mascaramento</strong> (ruído marrom, ruído branco ou chuva sintética), disponíveis no menu superior.
+              </div>
+            </div>
+
+            <!-- Card 4: Hábitos e Recompensas -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>🌱</span> Formação de Novos Hábitos
+              </div>
+              <div class="technique-card-body">
+                Bons hábitos trazem recompensas a médio e longo prazo. Associe a conclusão de cada Pomodoro a uma recompensa imediata (alongamento relaxante, hidratação, pausa consciente) para fortalecer o circuito dopaminérgico.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Column 2: As Regras Oficiais de Cirillo -->
+          <div class="section-box">
+            <div class="section-box-header">
+              <div class="section-box-title">
+                <span>🍅</span> As Regras Oficiais de Cirillo
+              </div>
+              <span class="brand-badge">Manual Cirillo</span>
+            </div>
+
+            <!-- Regra 1: Indivisibilidade -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>🛡️</span> 1. O Pomodoro é Indivisível
+              </div>
+              <div class="technique-card-body">
+                Não existe "meio Pomodoro" ou "quarto de Pomodoro". Se o timer começou, ele deve tocar até o final. Se uma interrupção for irreversível e não puder ser negociada, o Pomodoro deve ser <strong>anulado formalmente</strong> e reiniciado do zero.
+              </div>
+            </div>
+
+            <!-- Regra 2: Superaprendizagem (Overlearning) -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>⭐</span> 2. Princípio da Superaprendizagem
+              </div>
+              <div class="technique-card-body">
+                Se a tarefa planejada for concluída antes do sino tocar, <strong>não encerre o Pomodoro</strong>! Aproveite o tempo restante para revisar o que foi feito, buscar melhorias sutis, formatar ou aplicar Recordação Ativa. O Pomodoro continuará rodando em modo Overlearning.
+              </div>
+            </div>
+
+            <!-- Regra 3: Dividir e Agrupar -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>🧩</span> 3. Quebrar Tarefas Maiores que 5-7 Pomodoros
+              </div>
+              <div class="technique-card-body">
+                Se uma atividade do Mestrado demandar mais de 5 a 7 pomodoros, divida-a em subatividades menores e mais claras. Se a atividade durar menos de 1 pomodoro, agrupe-a com outras pequenas tarefas administrativas.
+              </div>
+            </div>
+
+            <!-- Regra 4: Proteger o Pomodoro -->
+            <div class="technique-card">
+              <div class="technique-card-title">
+                <span>⚔️</span> 4. Proteger o Pomodoro
+              </div>
+              <div class="technique-card-body">
+                Aprenda a lidar com interrupções: <em>Informar</em> ("estou finalizando um bloco"), <em>Negociar</em> ("posso falar com você às 11h?"), <em>Agendar</em> e <em>Retornar</em>. Anote os impulsos internos com o botão <strong>'</strong> para desocupar a mente.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- MAIN VIEW 5: ANALYTICS & HISTÓRICO -->
+      <section id="view-analytics" class="view-section">
+        <div class="analytics-metrics-grid">
+          <div class="metric-stat-box">
+            <span class="metric-stat-title">Pomodoros Concluídos</span>
+            <span class="metric-stat-num" id="stat-total-pomodoros">0</span>
+            <span class="metric-stat-sub" id="stat-pomodoros-sub">0 hoje</span>
+          </div>
+
+          <div class="metric-stat-box">
+            <span class="metric-stat-title">Tempo Total Focado</span>
+            <span class="metric-stat-num" id="stat-total-time">0h 00m</span>
+            <span class="metric-stat-sub">Tempo líquido de estudo</span>
+          </div>
+
+          <div class="metric-stat-box">
+            <span class="metric-stat-title">Interrupções Registradas</span>
+            <span class="metric-stat-num" id="stat-total-interrupts">0</span>
+            <span class="metric-stat-sub" id="stat-interrupts-breakdown">0 internas ( ' ) / 0 externas ( - )</span>
+          </div>
+
+          <div class="metric-stat-box">
+            <span class="metric-stat-title">Pomodoros Anulados</span>
+            <span class="metric-stat-num" id="stat-total-voided" style="color: #f87171;">0</span>
+            <span class="metric-stat-sub">Disciplina de indivisibilidade</span>
+          </div>
+        </div>
+
+        <div class="section-box">
+          <div class="section-box-header">
+            <div class="section-box-title">
+              <span>📜</span> Registro Diário de Sessões (Records Cirillo & Recordação Ativa)
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn-task-action" id="btn-export-data">Exportar Dados (JSON)</button>
+              <button class="btn-task-action" id="btn-clear-history" style="color: #f87171;">Limpar Histórico</button>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="sessions-table">
+              <thead>
+                <tr>
+                  <th>Data / Hora</th>
+                  <th>Tarefa</th>
+                  <th>Duração</th>
+                  <th>Status</th>
+                  <th>Interrupções</th>
+                  <th>Recordação Ativa (Resumo)</th>
+                </tr>
+              </thead>
+              <tbody id="sessions-table-body">
+                <!-- Dynamically rendered rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- ====================================================================
+       MODALS
+       ==================================================================== -->
+
+  <!-- MODAL: CONFIGURAÇÕES -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">Configurações do Timer</h2>
+        <button class="close-btn" data-close="modal-settings">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setting-focus-duration">Duração do Foco (minutos)</label>
+        <input type="number" id="setting-focus-duration" class="form-input" min="1" max="90" value="25">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setting-short-duration">Intervalo Curto (minutos)</label>
+        <input type="number" id="setting-short-duration" class="form-input" min="1" max="30" value="5">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setting-long-duration">Intervalo Longo (minutos)</label>
+        <input type="number" id="setting-long-duration" class="form-input" min="1" max="60" value="15">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setting-cycle-interval">Ciclos até o Intervalo Longo</label>
+        <input type="number" id="setting-cycle-interval" class="form-input" min="2" max="10" value="4">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setting-daily-goal">Meta Diária (pomodoros)</label>
+        <input type="number" id="setting-daily-goal" class="form-input" min="1" max="24" value="8">
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 1rem;">
+        <div>
+          <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">Tique-taque Mecânico Cirillo</span>
+          <p style="font-size: 0.76rem; color: var(--text-muted);">Som rítmico suave de relógio a cada segundo</p>
+        </div>
+        <input type="checkbox" id="setting-tick-sound" style="width: 20px; height: 20px; cursor: pointer;">
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">Auto-iniciar Intervalos</span>
+          <p style="font-size: 0.76rem; color: var(--text-muted);">Começar contagem da pausa assim que o foco terminar</p>
+        </div>
+        <input type="checkbox" id="setting-auto-breaks" style="width: 20px; height: 20px; cursor: pointer;">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modal-settings">Cancelar</button>
+        <button class="btn-primary" id="btn-save-settings">Salvar Configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA TAREFA -->
+  <div class="modal-overlay" id="modal-task">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-task-title">Nova Tarefa</h2>
+        <button class="close-btn" data-close="modal-task">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="task-input-title">Nome da Atividade *</label>
+        <input type="text" id="task-input-title" class="form-input" placeholder="Ex: Leitura do Capítulo 3 e Resumo Ativo" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="task-input-category">Categoria / Disciplina</label>
+        <select id="task-input-category" class="form-select">
+          <option value="Mestrado">Mestrado (Dissertação)</option>
+          <option value="Pesquisa">Pesquisa & Metodologia</option>
+          <option value="Artigo">Artigo Científico</option>
+          <option value="Leitura">Leitura Teórica</option>
+          <option value="Rotina">Rotina & Administração</option>
+          <option value="Geral">Geral</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="task-input-estimated">Estimativa de Pomodoros (25min cada)</label>
+        <select id="task-input-estimated" class="form-select">
+          <option value="1">1 Pomodoro (25 min)</option>
+          <option value="2" selected>2 Pomodoros (50 min)</option>
+          <option value="3">3 Pomodoros (1h 15min)</option>
+          <option value="4">4 Pomodoros (1h 40min)</option>
+          <option value="5">5 Pomodoros (2h 05min - limite recomendado)</option>
+          <option value="6">6 Pomodoros</option>
+          <option value="7">7 Pomodoros (dividir se maior)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="task-input-notes">Anotações / Objetivo Específico</label>
+        <textarea id="task-input-notes" class="form-textarea" rows="2" placeholder="Ex: Focar no objetivo geral e perguntas de pesquisa"></textarea>
+      </div>
+
+      <div class="form-group" id="group-urgent-checkbox" style="display: flex; align-items: center; gap: 0.65rem;">
+        <input type="checkbox" id="task-input-urgent" style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="task-input-urgent" style="font-size: 0.85rem; color: #f87171; cursor: pointer; font-weight: 600;">
+          Marcar como Não Planejada & Urgente (Imprevisto)
+        </label>
+      </div>
+
+      <input type="hidden" id="task-target-list" value="today">
+
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modal-task">Cancelar</button>
+        <button class="btn-primary" id="btn-save-task">Adicionar Atividade</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR INTERRUPÇÃO RÁPIDA (CIRILLO) -->
+  <div class="modal-overlay" id="modal-interrupt">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-interrupt-title">Registrar Interrupção</h2>
+        <button class="close-btn" data-close="modal-interrupt">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;" id="modal-interrupt-desc">
+        Anotar impulsos ou chamados ajuda a "desocupar a memória de trabalho" sem perder o foco na tarefa atual.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label" for="interrupt-input-note">
+          Surgiu um pensamento ou tarefa inesperada? (Opcional)
+        </label>
+        <input type="text" id="interrupt-input-note" class="form-input" placeholder="Ex: Responder e-mail do orientador">
+        <p style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.35rem;">
+          Se preenchido, será adicionado automaticamente na lista de <em>Imprevistos & Urgentes</em> para você resolver mais tarde.
+        </p>
+      </div>
+
+      <input type="hidden" id="interrupt-type-input" value="internal">
+
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modal-interrupt">Apenas Contabilizar</button>
+        <button class="btn-primary" id="btn-confirm-interrupt">Registrar & Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RECORDAÇÃO ATIVA (ACTIVE RECALL - IFRS GUIA 2024) -->
+  <div class="modal-overlay" id="modal-active-recall">
+    <div class="modal-box" style="max-width: 560px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <span style="font-size: 1.5rem;">🎉</span>
+          <div>
+            <h2 class="modal-title" style="font-size: 1.2rem;">Pomodoro Concluído!</h2>
+            <span style="font-size: 0.76rem; color: var(--short-accent); font-weight: 700;">Recordação Ativa Neurocognitiva (IFRS)</span>
+          </div>
+        </div>
+        <button class="close-btn" data-close="modal-active-recall">&times;</button>
+      </div>
+
+      <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid var(--short-accent); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
+        <p style="font-size: 0.82rem; color: #a7f3d0; line-height: 1.45;">
+          <strong>Exercício de Consolidação:</strong> Sem olhar seus livros ou arquivos, force a mente a lembrar: <em>Quais foram os 2 ou 3 pontos essenciais que você acabou de ler, sintetizar ou construir neste Pomodoro?</em>
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="recall-input-text">Seu Resumo Ativo de Fechamento:</label>
+        <textarea id="recall-input-text" class="form-textarea" rows="3" placeholder="Ex: Entendi que a introdução precisa conectar o problema da evasão com a metodologia mista do capítulo 2..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btn-skip-recall">Pular Resumo</button>
+        <button class="btn-primary" id="btn-save-recall" style="background: var(--short-gradient); box-shadow: 0 4px 15px var(--short-glow);">
+          Salvar & Ir Para a Pausa ☕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR ANULAÇÃO DE POMODORO (VOID) -->
+  <div class="modal-overlay" id="modal-void-confirm">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.3rem;">⚠️</span>
+          <h2 class="modal-title" style="color: #f87171;">Anular Pomodoro</h2>
+        </div>
+        <button class="close-btn" data-close="modal-void-confirm">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+        De acordo com Francesco Cirillo: <em>"O Pomodoro é indivisível. Se uma interrupção não puder ser adiada ou negociada, o Pomodoro é considerado nulo, como se nunca tivesse existido."</em>
+      </p>
+
+      <div class="form-group">
+        <label class="form-label" for="void-reason-input">Motivo da Anulação:</label>
+        <input type="text" id="void-reason-input" class="form-input" placeholder="Ex: Chamada de emergência ou reunião imprevista">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="modal-void-confirm">Continuar Foco</button>
+        <button class="btn-primary" id="btn-confirm-void-action" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">
+          Confirmar Anulação
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CELEBRATION TOAST -->
+  <div class="celebration-toast" id="celebration-toast">
+    <span style="font-size: 1.5rem;" id="toast-icon">✨</span>
+    <div>
+      <div style="font-size: 0.9rem; font-weight: 700; color: #fff;" id="toast-title">Excelente trabalho!</div>
+      <div style="font-size: 0.78rem; color: var(--text-secondary);" id="toast-message">Mais um bloco de foco consolidado.</div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
